@@ -1,0 +1,4 @@
+package edwinrndr
+
+class Foo {
+}

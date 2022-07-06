@@ -1,12 +1,25 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.utils.addToStdlib.ifTrue
 
-group = "org.openrndr.template"
-version = "0.4.0"
+// set these to com.github.[github-user-name], as such we can publish the library
+// both locally and through jitpack
 
+group = "com.github.edwinRNDR"
+version = "master-SNAPSHOT"
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId =  project.group as String //"com.github.edwinRNDR"
+            artifactId = project.name
+            version = project.version as String//"master-SNAPSHOT"
+
+            from(components["java"])
+        }
+    }
+}
 val applicationMainClass = "TemplateProgramKt"
 
 /**  ## additional ORX features to be added to this project */
@@ -88,8 +101,9 @@ val applicationLogging = Logging.FULL
 
 plugins {
     java
+    `maven-publish`
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.shadow)
+//    alias(libs.plugins.shadow)
     alias(libs.plugins.runtime)
     alias(libs.plugins.gitarchive.tomarkdown).apply(false)
 }
@@ -131,71 +145,6 @@ configure<JavaPluginConvention> {
 }
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-}
-
-// ------------------------------------------------------------------------------------------------------------------ //
-
-project.setProperty("mainClassName", applicationMainClass)
-tasks {
-    named<ShadowJar>("shadowJar") {
-        manifest {
-            attributes["Main-Class"] = applicationMainClass
-        }
-        minimize {
-            exclude(dependency("org.openrndr:openrndr-gl3:.*"))
-            exclude(dependency("org.jetbrains.kotlin:kotlin-reflect:.*"))
-        }
-    }
-    named<org.beryx.runtime.JPackageTask>("jpackage") {
-        doLast {
-            when (OperatingSystem.current()) {
-                OperatingSystem.WINDOWS, OperatingSystem.LINUX -> {
-                    copy {
-                        from("data") {
-                            include("**/*")
-                        }
-                        into("build/jpackage/openrndr-application/data")
-                    }
-                }
-                OperatingSystem.MAC_OS -> {
-                    copy {
-                        from("data") {
-                            include("**/*")
-                        }
-                        into("build/jpackage/openrndr-application.app/data")
-                    }
-                }
-            }
-        }
-    }
-}
-
-// ------------------------------------------------------------------------------------------------------------------ //
-
-tasks.register<Zip>("jpackageZip") {
-    archiveFileName.set("openrndr-application.zip")
-    from("$buildDir/jpackage") {
-        include("**/*")
-    }
-}
-tasks.findByName("jpackageZip")?.dependsOn("jpackage")
-
-// ------------------------------------------------------------------------------------------------------------------ //
-
-runtime {
-    jpackage {
-        imageName = "openrndr-application"
-        skipInstaller = true
-        if (OperatingSystem.current() == OperatingSystem.MAC_OS) jvmArgs.add("-XstartOnFirstThread")
-    }
-    options.set(listOf("--strip-debug", "--compress", "1", "--no-header-files", "--no-man-pages"))
-    modules.set(listOf("jdk.unsupported", "java.management"))
-}
-
-// ------------------------------------------------------------------------------------------------------------------ //
-
-tasks.register<org.openrndr.extra.gitarchiver.GitArchiveToMarkdown>("gitArchiveToMarkDown") {
-    historySize.set(20)
 }
 
 // ------------------------------------------------------------------------------------------------------------------ //
