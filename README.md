@@ -1,25 +1,85 @@
-# OPENRNDR template project
+# OPENRNDR library template
 
-A feature rich template for creating OPENRNDR programs based on Gradle/Kts
+A project template to ease sharing your frequently used classes and extensions. 
+You can publish the library
+* locally (to maven local) to use it in various OPENRNDR projects 
+* online, thanks to [jitpack](https://jitpack.io/), 
+which takes care of building the library and making it available to other users.
 
-The template consists of a configuration for Gradle and an example OPENRNDR program. The Gradle configuration should serve as the
-go-to starting point for writing OPENRNDR-based software.
+## Configuration
 
-If you are looking at this from IntelliJ IDEA you can start by expanding the _project_ tab on the left. You will find a template program in `src/main/kotlin/TemplateProgram.kt`
+Before using this template set the following values:
 
-You will find some [basic instructions](https://guide.openrndr.org/#/02_Getting_Started_with_OPENRNDR/C00_SetupYourFirstProgram) in the [OPENRNDR guide](https://guide.openrndr.org)
+### build.gradle.kts
 
-## Gradle tasks
- - `run` runs the TemplateProgram
- - `jar` creates an executable platform specific jar file with all dependencies
- - `zipDistribution` creates a zip file containing the application jar and the data folder
- - `jpackageZip` creates a zip with a stand-alone executable for the current platform (works with Java 14 only)
+GitLab and other git hosts 
+[can also be used by jitpack](https://docs.jitpack.io/#other-git-hosts).
+You can leave `version` unchanged.
 
-## Cross builds
-To create runnable jars for a platform different from the platform you use to build one uses `./gradlew jar --PtargetPlatform=<platform>`. The supported platforms are `windows`, `macos`, `linux-x64` and `linux-arm64`. Note that the `linux-arm64` platform will only work with OPENRNDR snapshot builds from master and OPENRNDR 0.3.39 (a future version).
+```
+group = "com.github.YOUR-USER-NAME"   
+version = "main-SNAPSHOT"
+```
 
-## Github Actions
+### settings.gradle.kts
 
-This repository contains a number of Github Actions in `./github/workflows`. 
-The actions enable a basic build run on commit, plus publication actions that are executed when
-a commit is tagged with a version number like `v0.*` or `v1.*`.
+```
+rootProject.name = "openrndr-my-library"
+```
+
+This will be the library name when shared online.
+
+### Write some code
+
+Place your library code, ideally organized in packages, inside `src/main/kotlin/`. A minimal library example:
+
+```
+// src/main/kotlin/Foo.kt
+package com.myuser
+
+class Foo {
+    val bar = 12345
+}
+```
+
+## Publish 
+
+### Locally
+
+- Run the `publishToMavenLocal` Gradle task.
+
+### Online
+
+- Push this repo including your library code into GitHub, Gitlab or similar.
+- Create a git Tag in the web interface for the version you want to distribute.
+
+## Using the library 
+
+In the project where you want to use your library you need to make two small changes to `build.gradle.kts`:
+
+### Locally
+
+Use this option while developing your library and your programs.
+
+1. Add `mavenLocal()` to the `repositories { ... }` block.
+2. Inside the `dependencies { ... }` block, add a reference to your library matching the values you set earlier, for instance:<br>`implementation("com.github.YOUR-USER-NAME:openrndr-my-library:main-SNAPSHOT")`.
+3. Reload gradle and wait for indexing.
+4. The library code should be available in your project: 
+```
+val foo = Foo()
+println(foo.bar)
+```
+
+
+### Online
+
+Use this option to share your library with others.
+
+1. Add `maven(url = "https://jitpack.io")` to the `repositories { ... }` block.
+2. Inside the `dependencies { ... }` block, add a reference to your library matching the values you set earlier and the Tag you created, for instance `implementation("com.github.YOUR-USER-NAME:openrndr-my-library:[TAG]")`.
+3. Reload gradle and wait for the library to be created in the jitpack server, then wait to download and index. It can take a few minutes on the first request and even fail to install the library. No worries: just reload Gradle after a few minutes (giving it time to build). Once the library is built downloading it is quick. That should be the experience for users of your library.
+4. The library code should be available in your project:
+```
+val foo = Foo()
+println(foo.bar)
+```

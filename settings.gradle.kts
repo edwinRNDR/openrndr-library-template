@@ -1,4 +1,5 @@
 enableFeaturePreview("VERSION_CATALOGS")
+
 rootProject.name = "template-library"
 
 val openrndrUseSnapshot = false
