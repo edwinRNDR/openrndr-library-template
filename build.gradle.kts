@@ -20,7 +20,6 @@ publishing {
         }
     }
 }
-val applicationMainClass = "TemplateProgramKt"
 
 /**  ## additional ORX features to be added to this project */
 val orxFeatures = setOf(
