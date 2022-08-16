@@ -1,7 +1,6 @@
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
-import org.jetbrains.kotlin.utils.addToStdlib.ifTrue
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // set these to com.github.[github-user-name], as such we can publish the library
 // both locally and through jitpack
@@ -98,6 +97,7 @@ val applicationLogging = Logging.FULL
 
 // ------------------------------------------------------------------------------------------------------------------ //
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     java
     `maven-publish`
@@ -139,11 +139,11 @@ dependencies {
 
 // ------------------------------------------------------------------------------------------------------------------ //
 
-configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_1_8
+configure<JavaPluginExtension> {
+    sourceCompatibility = JavaVersion.VERSION_11
 }
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 // ------------------------------------------------------------------------------------------------------------------ //
@@ -186,7 +186,9 @@ class Openrndr {
 
     init {
         repositories {
-            listOf(openrndrVersion, orxVersion, ormlVersion).any { it.contains("SNAPSHOT") }.ifTrue { mavenLocal() }
+            if (listOf(openrndrVersion, orxVersion, ormlVersion).any { "SNAPSHOT" in it }) {
+                mavenLocal()
+            }
             maven(url = "https://maven.openrndr.org")
         }
         dependencies {
