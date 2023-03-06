@@ -87,7 +87,7 @@ val ormlFeatures = setOf<String>(
 
 /** ## additional OPENRNDR features to be added to this project */
 val openrndrFeatures = setOfNotNull(
-    if (DefaultNativePlatform("current").architecture.name != "arm-v8") "video" else null
+    "video"
 )
 
 /** ## configure the type of logging this project uses */
@@ -102,9 +102,6 @@ plugins {
     java
     `maven-publish`
     alias(libs.plugins.kotlin.jvm)
-//    alias(libs.plugins.shadow)
-    alias(libs.plugins.runtime)
-    alias(libs.plugins.gitarchive.tomarkdown).apply(false)
 }
 
 repositories {
@@ -128,7 +125,7 @@ dependencies {
             runtimeOnly(libs.slf4j.simple)
         }
         Logging.FULL -> {
-            runtimeOnly(libs.log4j.slf4j)
+            runtimeOnly(libs.log4j.slf4j2)
             runtimeOnly(libs.jackson.databind)
             runtimeOnly(libs.jackson.json)
         }
